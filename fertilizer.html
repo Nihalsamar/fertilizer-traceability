@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>KisanTrace — Hybrid Fertilizer Traceability (Model 3 Safe)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Preserved Hybrid Fertilizer Supply Chain Provenance Model 3. Complete manufacturer to farmer digital twin with DBT subsidy verification and reverse-flow recall.">
+  <meta name="theme-color" content="#09101d">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a855f7'/%3E%3Cstop offset='50%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8'/%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230f172a'/%3E%3Cpath d='M16 6 L26 12 L26 22 L16 28 L6 22 L6 12 Z' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ccircle cx='16' cy='17' r='4' fill='url(%23g)'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="fertilizer_styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Authentic Subtle Film Grain Overlay -->
+  <div class="grain-overlay" aria-hidden="true" style="position:fixed; inset:0; width:100%; height:100%; background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.04\'/%3E%3C/svg%3E'); pointer-events:none; z-index:999;"></div>
+
+  <div id="app">
+    <!-- 3D Canvas -->
+    <canvas id="c" aria-label="3D model of fertilizer supply chain from manufacturer to farmer"></canvas>
+
+    <!-- Top View & Presets Bar -->
+    <div id="top-bar">
+      <div class="top-left">
+        <a href="/" class="brand-logo" title="KisanTrace Home" style="text-decoration:none; display:flex; align-items:center; gap:8px; margin-right:8px;">
+          <div style="width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg, #a855f7, #6366f1); display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px;">⚡</div>
+          <span style="font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:800; color:#fff;">KisanTrace</span>
+        </a>
+        <div class="project-switcher" title="Switch between Active Farm-to-Fork Produce and Safe Fertilizer Project">
+          <a href="/" class="project-switch-btn" style="text-decoration:none;">
+            <span>🌿</span>
+            <span>Farm-to-Fork Produce</span>
+          </a>
+          <button class="project-switch-btn active" style="cursor:default;">
+            <span>⚡</span>
+            <span>Fertilizer Model 3 (Safe)</span>
+          </button>
+        </div>
+        <button class="chip" data-v="auto" aria-pressed="true">Step view</button>
+        <button class="chip" data-v="over" aria-pressed="false">Overview</button>
+        <button class="chip" data-v="farmer" aria-pressed="false">Farmer's POV</button>
+        <button class="chip" id="dataBtn" aria-pressed="true">Data lines</button>
+        <!-- Dedicated All Details Button -->
+        <button class="chip" id="btn-open-details">📋 All Details</button>
+        <!-- Dedicated Core Determinants Button -->
+        <button class="chip" id="btn-open-determinants">⚙ Core Determinants</button>
+        <!-- Dedicated Turso Database Button -->
+        <button class="chip" id="btn-open-turso">🗄️ Turso DB</button>
+        <!-- Dedicated Excel Export Button -->
+        <button class="chip" id="btn-open-excel" style="background: rgba(16, 185, 129, 0.16); border-color: rgba(16, 185, 129, 0.45); color: #34d399; font-weight:600;">📊 Excel Hub</button>
+        <!-- 1-Click Direct Excel Download Button -->
+        <button class="chip" id="btn-quick-excel" title="Download all Turso DB records &amp; clicks to Excel with 1 click" style="background: linear-gradient(135deg, #059669, #10b981); color:#ffffff; font-weight:700; border:none; box-shadow:0 2px 8px rgba(16,185,129,0.35);">⚡ 1-Click Excel</button>
+        <!-- Dedicated Reverse Flow Button -->
+        <button class="chip danger-chip" id="btn-reverse-flow-top">↩ Reverse Flow</button>
+      </div>
+
+      <div class="top-right">
+        <button class="chip" id="soundBtn" aria-pressed="true">🔊 Sound</button>
+        <button class="chip" id="langBtn">हिन्दी</button>
+      </div>
+    </div>
+
+    <!-- Farmer's Phone HUD (Appears in Farmer's POV Mode) -->
+    <div id="phone-hud">
+      <div class="phone-header">
+        <h3>📱 Farmer Verification Hub</h3>
+        <span style="font-size:11px; color:#94a3b8;">4G &bull; Aadhaar DBT</span>
+      </div>
+
+      <!-- 3 Verification Channels (from PDF Point 7) -->
+      <div class="channel-pills">
+        <button class="channel-pill active" data-channel="smart">① Smartphone</button>
+        <button class="channel-pill" data-channel="ussd">② USSD (*99#)</button>
+        <button class="channel-pill" data-channel="pos">③ POS Biometrics</button>
+      </div>
+
+      <div id="phone-body">
+        <!-- Dynamically populated with verification history & DBT credit -->
+      </div>
+    </div>
+
+    <!-- Collapsible Step Narrative HUD Card -->
+    <div id="card">
+      <div id="hd">
+        <span id="sn">1/8</span>
+        <div id="ttl">
+          <h2 id="t">1 · Manufacturer &amp; 3-level QR</h2>
+          <small id="hi">निर्माता व 3-स्तरीय क्यूआर</small>
+        </div>
+        <button id="fold" aria-label="Collapse details">▾</button>
+      </div>
+
+      <div id="body">
+        <p id="tx"></p>
+
+        <!-- Live Environmental Telemetry Reading Bar -->
+        <div id="rdg">
+          Time: waiting · GPS · Temp · Humidity
+        </div>
+
+        <!-- Data & Smart Contract Columns (From PDF) -->
+        <div class="cols">
+          <div>
+            <h3>Data Stored in Batch</h3>
+            <ul id="st"></ul>
+          </div>
+          <div>
+            <h3>Blockchain Action</h3>
+            <ul id="ac"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Always-Visible Interactive Controls Dock -->
+    <div id="control-dock">
+      <!-- Dock Top Row: Controls, Packets Control, and Reverse Flow -->
+      <div class="dock-top-row">
+        <!-- Play / Nav Buttons -->
+        <div class="dock-actions-left">
+          <button class="btn pri" id="btn-start-run">Start Tour</button>
+          <button class="btn" id="btn-reset-run">Reset</button>
+          <button class="btn" id="prev" disabled>‹ Back</button>
+          <button class="btn" id="next">Next ›</button>
+        </div>
+
+        <!-- Packets Control (1 Bag / 1 Pallet / 1 Master Container) -->
+        <div class="packets-control-group" title="Select Packet Level (from PDF Point 1)">
+          <button class="packet-btn" data-pack="bag">📦 1 Bag (50kg)</button>
+          <button class="packet-btn active" data-pack="pallet">📦📦 Pallet (50 Bags)</button>
+          <button class="packet-btn" data-pack="master">🏭 Container (20 Pallets)</button>
+        </div>
+
+        <!-- Reverse Flow Trigger Button -->
+        <button class="chip danger-chip" id="btn-reverse-trigger" title="Trigger Reverse Flow (PDF Point 8)">
+          ↩ Trigger Reverse Flow
+        </button>
+      </div>
+
+      <!-- Dock Sliders Row: Live Temperature & Humidity Controls -->
+      <div class="dock-sliders-row">
+        <!-- Temperature Slider -->
+        <div class="slider-unit">
+          <div class="slider-meta-head">
+            <span>Ambient Temperature (Limit: 40 °C)</span>
+            <b id="Tv">28.0 °C</b>
+          </div>
+          <input type="range" class="dock-slider" id="T" min="10" max="55" step="0.5" value="28">
+        </div>
+
+        <!-- Humidity Slider -->
+        <div class="slider-unit">
+          <div class="slider-meta-head">
+            <span>Relative Humidity (Limit: 85 %)</span>
+            <b id="Hv">55 %</b>
+          </div>
+          <input type="range" class="dock-slider" id="H" min="20" max="100" step="1" value="55">
+        </div>
+      </div>
+
+      <!-- Dock Hint -->
+      <div class="dock-hint">
+        <span><strong>Smart Contract Rule:</strong> Exceeding 40 °C or 85 % humidity automatically discards the batch and triggers reverse flow back to manufacturer.</span>
+        <span id="reverse-status-msg" style="color:#a7f3d0; font-weight:600;">Status: Batch Compliant ✓</span>
+      </div>
+    </div>
+
+    <!-- Modal: Provenance Hub & Core Determinants -->
+    <div class="modal-backdrop" id="modal-details">
+      <div class="modal-window">
+        <div class="modal-head">
+          <div class="modal-head-left">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>KisanTrace &bull; Architecture &amp; Provenance Hub</span>
+            </h3>
+            <div class="modal-tabs">
+              <button class="modal-tab-btn active" id="tab-btn-telemetry">📋 Telemetry &amp; Logs</button>
+              <button class="modal-tab-btn" id="tab-btn-determinants">⚙ Core Determinants &amp; Parameters</button>
+              <button class="modal-tab-btn" id="tab-btn-turso">🗄️ Turso Database Hub</button>
+              <button class="modal-tab-btn" id="tab-btn-excel" style="color:#34d399;">📊 Excel Database Hub</button>
+            </div>
+          </div>
+          <button class="modal-close" id="btn-close-details">✕</button>
+        </div>
+        <div class="modal-content">
+          <!-- View 1: Telemetry & Live Logs -->
+          <div id="view-telemetry">
+            <p style="font-size:12px; color:#94a3b8; margin-bottom:12px;">
+              End-to-end audit trail including timestamps, GPS coordinates, environmental readings, cryptographic hashes, and smart contract custody records:
+            </p>
+            <div class="details-table-wrap">
+              <table class="details-table">
+                <thead>
+                  <tr>
+                    <th>Node</th>
+                    <th>GPS Coordinates</th>
+                    <th>Timestamp</th>
+                    <th>Temp / Humidity</th>
+                    <th>Packet Hierarchy</th>
+                    <th>QC / Hash</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="details-table-body">
+                  <!-- Dynamically generated rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- View 2: Core Determinants & System Parameters -->
+          <div id="view-determinants" style="display:none;">
+            <p style="font-size:12px; color:#94a3b8; margin-bottom:16px;">
+              Technical determinants, cryptographic standards, hardware specifications, and regulatory frameworks governing the blockchain traceable supply chain:
+            </p>
+            <div class="determinants-grid">
+              <!-- Part 1 -->
+              <div class="det-card">
+                <div class="det-card-head">
+                  <div class="det-card-icon" style="background:rgba(16,185,129,0.15); color:#10b981;">🧪</div>
+                  <div>
+                    <h4 class="det-card-title">Part 1 &bull; Product Authenticity &amp; Composition Data</h4>
+                    <span class="det-badge det-badge-green">Chemical Integrity Layer</span>
+                  </div>
+                </div>
+                <ul class="det-list">
+                  <li><strong>Raw Material Provenance:</strong> Upstream origin hashing for Nitrogen (Haber-Bosch natural gas), Phosphorus (rock phosphate mines in Jordan/Rajasthan), and Potash (MOP/SOP sources).</li>
+                  <li><strong>Chemical Formulation Percentages:</strong> Guaranteed N-P-K stoichiometry (e.g. Urea 46.2% N, DAP 18-46-0). Maximum tolerances: Biuret &le; 1.5%, moisture &le; 0.5%, particle size 1.0–2.8 mm.</li>
+                  <li><strong>Lab-Tested Quality &amp; Certification:</strong> Pre-dispatch HPLC &amp; spectroscopy records. Cryptographically signed with accredited lab's Ed25519 private key into batch certificates.</li>
+                </ul>
+              </div>
+
+              <!-- Part 2 -->
+              <div class="det-card">
+                <div class="det-card-head">
+                  <div class="det-card-icon" style="background:rgba(59,130,246,0.15); color:#3b82f6;">🏷️</div>
+                  <div>
+                    <h4 class="det-card-title">Part 2 &bull; Unique Identification &amp; Data Capture</h4>
+                    <span class="det-badge det-badge-blue">Hardware &amp; Serialization Layer</span>
+                  </div>
+                </div>
+                <ul class="det-list">
+                  <li><strong>Hierarchical 3-Level Identifiers:</strong>
+                    <div class="det-subtags">
+                      <span class="det-pill">1 Bag (50 kg) &rarr; Unit Bag QR (SHA-256)</span>
+                      <span class="det-pill">50 Bags &rarr; Pallet QR (50 Hashes Merkle Root)</span>
+                      <span class="det-pill">20 Pallets (50 MT) &rarr; Master Container RFID (EPC Gen2)</span>
+                    </div>
+                  </li>
+                  <li><strong>IoT Edge Sensor Telemetry:</strong> Real-time environmental tracking (temperature, relative humidity, multi-axis shock, battery health) with cellular 4G/NB-IoT &amp; GPS backhaul.</li>
+                  <li><strong>Active Threshold Guardrails:</strong> Critical tripwire at <strong>T &gt; 40.0 °C</strong> or <strong>H &gt; 85.0 %</strong>. Over-limit triggers instant quarantine and reverse-flow throw back.</li>
+                </ul>
+              </div>
+
+              <!-- Part 3 -->
+              <div class="det-card">
+                <div class="det-card-head">
+                  <div class="det-card-icon" style="background:rgba(245,158,11,0.15); color:#f59e0b;">🚚</div>
+                  <div>
+                    <h4 class="det-card-title">Part 3 &bull; Supply Chain Stage Mapping</h4>
+                    <span class="det-badge det-badge-amber">Lifecycle &amp; Custody Layer</span>
+                  </div>
+                </div>
+                <ul class="det-list">
+                  <li><strong>Manufacturing / Production:</strong> Raw material entry, mixing &amp; granulation, automated packaging timestamps, genesis block batch minting with factory GPS.</li>
+                  <li><strong>Warehousing / Storage:</strong> RFID gate logs inward custody; decision point routes sound stock to transporter or damaged stock back to factory.</li>
+                  <li><strong>Logistics / Transport:</strong> Vehicle binding (UP-32-BT-9014), continuous GPS transit corridor telemetry (NH-19), tamper-seal verification.</li>
+                  <li><strong>District Distribution:</strong> Pallet QR scan for bulk custody handoff, sub-lot splitting, reverse-flow staging for damaged pallets.</li>
+                  <li><strong>Retailer POS (Works Offline):</strong> Village-resilient local SQLite cache, signed with timestamp + nonce, local OTP receipt, batch sync upon reconnection.</li>
+                  <li><strong>Farmer &amp; DBT Subsidy:</strong> 3 Citizen channels (① Smartphone QR, ② Feature Phone SMS/USSD *99#, ③ Aadhaar POS) release ₹1,500 DBT straight to bank account.</li>
+                </ul>
+              </div>
+
+              <!-- Part 4 -->
+              <div class="det-card">
+                <div class="det-card-head">
+                  <div class="det-card-icon" style="background:rgba(139,92,246,0.15); color:#8b5cf6;">⛓️</div>
+                  <div>
+                    <h4 class="det-card-title">Part 4 &bull; Blockchain Architecture &amp; Governance</h4>
+                    <span class="det-badge det-badge-purple">Consortium &amp; Smart Contract Layer</span>
+                  </div>
+                </div>
+                <ul class="det-list">
+                  <li><strong>Network Topology:</strong> Permissioned / consortium blockchain (Hyperledger Fabric / Enterprise EVM). Private data collections protect proprietary pricing and commercial formulas.</li>
+                  <li><strong>Consensus Mechanism:</strong> High-efficiency PBFT (Practical Byzantine Fault Tolerance) / Raft / PoA. Sub-second finality, 2,500+ TPS, zero wasteful mining energy.</li>
+                  <li><strong>Smart Contracts &amp; Automation:</strong> Programmable compliance rules, automated multi-sig custody transfer, automated recall upon sensor violation, single-use token burn preventing bag refilling.</li>
+                </ul>
+              </div>
+
+              <!-- Part 5 -->
+              <div class="det-card">
+                <div class="det-card-head">
+                  <div class="det-card-icon" style="background:rgba(236,72,153,0.15); color:#ec4899;">🏛️</div>
+                  <div>
+                    <h4 class="det-card-title">Part 5 &bull; Regulatory &amp; Compliance Tracking</h4>
+                    <span class="det-badge det-badge-pink">Governance &amp; Environmental Layer</span>
+                  </div>
+                </div>
+                <ul class="det-list">
+                  <li><strong>Policy &amp; Licensing Integration:</strong> Real-time API bridges with national fertilizer systems (e.g. India's iFMS / DBT Fertilizer portal, manufacturer licenses, MRP ceiling checks).</li>
+                  <li><strong>Subsidy Fraud &amp; Anti-Hoarding:</strong> Aadhaar &amp; land-record (Bhulekh) acreage-based purchase caps prevent diversion, black marketing, and unauthorized commercial resale.</li>
+                  <li><strong>Environmental &amp; Runoff Governance:</strong> Nutrient application tracking against Soil Health Card guidelines, nitrogen runoff mitigation, and carbon footprint ledger audits.</li>
+                </ul>
+              </div>
+          </div>
+
+          <!-- View 3: Turso Database Hub -->
+          <div id="view-turso" style="display:none;">
+            <div class="turso-hub-container">
+              <!-- Live Database Banner -->
+              <div class="turso-banner" id="turso-live-banner">
+                <div class="turso-status-dot pulse" id="turso-pulse-dot"></div>
+                <div class="turso-banner-text">
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">Active libSQL Storage Engine</div>
+                  <div id="turso-banner-status" style="font-weight:700; font-size:13.5px; color:#38bdf8;">Checking Database Connection...</div>
+                </div>
+                <button class="chip" id="btn-refresh-turso-status" style="margin-left:auto; font-size:11px;">🔄 Ping DB</button>
+              </div>
+
+              <!-- Connection & Update Form -->
+              <div class="turso-config-card">
+                <h4 style="margin:0 0 6px 0; font-size:13.5px; color:#f8fafc; display:flex; align-items:center; gap:8px;">
+                  <span>⚡ Connect &amp; Update Turso Database</span>
+                  <span class="det-badge det-badge-blue">Cloud Sync</span>
+                </h4>
+                <p style="font-size:11.5px; color:#94a3b8; margin:0 0 12px 0; line-height:1.45;">
+                  Connect your remote Turso cloud database (or sync updates directly to your local libSQL storage). Click <strong>Connect &amp; Update</strong> to verify and seed all 6 relational tables with immutable blockchain provenance records.
+                </p>
+                <div class="turso-form-grid">
+                  <div class="turso-form-group">
+                    <label for="turso-url-input">Turso Database URL:</label>
+                    <input type="text" id="turso-url-input" class="turso-input" placeholder="libsql://your-db-org.turso.io (or leave blank for local)" />
+                  </div>
+                  <div class="turso-form-group">
+                    <label for="turso-token-input">Turso Auth Token:</label>
+                    <input type="password" id="turso-token-input" class="turso-input" placeholder="eyJhbGciOi... (optional for local)" />
+                  </div>
+                  <div class="turso-form-group" style="grid-column: 1 / -1;">
+                    <label for="turso-admin-key-input">Admin Security Key (Required for Connect &amp; Re-Sync):</label>
+                    <input type="password" id="turso-admin-key-input" class="turso-input" value="kisantrace-admin-2026" placeholder="Enter admin key (default: kisantrace-admin-2026)" />
+                  </div>
+                </div>
+                <div class="turso-actions-row">
+                  <button class="turso-btn-primary" id="btn-turso-connect">⚡ Connect &amp; Update Database</button>
+                  <button class="turso-btn-secondary" id="btn-turso-sync">🔄 Re-Sync All 6 Tables</button>
+                  <button class="turso-btn-secondary" id="btn-turso-push-current">📤 Push Current Sensor Telemetry</button>
+                </div>
+                <div id="turso-msg" class="turso-msg-box" style="display:none;"></div>
+              </div>
+
+              <!-- Live Tables Counter Grid -->
+              <div class="turso-tables-section">
+                <h5 style="margin:0 0 10px 0; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#94a3b8;">Live Database Record Counts</h5>
+                <div class="turso-stats-grid">
+                  <div class="turso-stat-card">
+                    <div class="turso-stat-val" id="stat-cnt-batches">-</div>
+                    <div class="turso-stat-lbl">Batches</div>
+                  </div>
+                  <div class="turso-stat-card">
+                    <div class="turso-stat-val" id="stat-cnt-packaging">-</div>
+                    <div class="turso-stat-lbl">Packaging Levels</div>
+                  </div>
+                  <div class="turso-stat-card">
+                    <div class="turso-stat-val" id="stat-cnt-telemetry">-</div>
+                    <div class="turso-stat-lbl">Telemetry Logs</div>
+                  </div>
+                  <div class="turso-stat-card">
+                    <div class="turso-stat-val" id="stat-cnt-custody">-</div>
+                    <div class="turso-stat-lbl">Custody Steps</div>
+                  </div>
+                  <div class="turso-stat-card">
+                    <div class="turso-stat-val" id="stat-cnt-dbt">-</div>
+                    <div class="turso-stat-lbl">DBT Disbursements</div>
+                  </div>
+                  <div class="turso-stat-card">
+                    <div class="turso-stat-val" id="stat-cnt-reverse">-</div>
+                    <div class="turso-stat-lbl">Reverse Flow Events</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View 4: Excel Database Hub -->
+          <div id="view-excel" style="display:none;">
+            <div class="excel-hub-container">
+              <!-- Excel Banner -->
+              <div class="excel-banner">
+                <div style="font-size:26px;">📊</div>
+                <div>
+                  <div style="font-size:13.5px; font-weight:700; color:#34d399;">Turso Database Excel Extraction &amp; IoT Provenance Ledger</div>
+                  <div style="font-size:11.5px; color:#94a3b8; line-height:1.45;">
+                    Extract all database records gathered in Turso Cloud. Includes exact timestamps, separated Latitude &amp; Longitude coordinates, decimal GPS for GIS mapping, environmental telemetry, blockchain custody hops, and DBT subsidy disbursements.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Toolbar -->
+              <div class="excel-toolbar">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <button class="excel-btn-download" id="btn-download-excel-full">
+                    <span>📥</span>
+                    <span>Download Excel Workbook (.xlsx)</span>
+                  </button>
+                  <button class="excel-btn-csv" id="btn-download-csv-full">
+                    <span>📄</span>
+                    <span>Download Telemetry CSV</span>
+                  </button>
+                  <button class="excel-btn-csv" id="btn-refresh-excel-data">
+                    <span>🔄</span>
+                    <span>Refresh from Turso DB</span>
+                  </button>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input type="text" id="excel-search-input" class="turso-input" style="width:200px; padding:6px 10px;" placeholder="🔍 Filter records..." />
+                  <span id="excel-row-count-badge" style="font-size:11px; color:#94a3b8; font-family:var(--mono);">0 rows</span>
+                </div>
+              </div>
+
+              <!-- Sub Tabs for Datasets -->
+              <div class="excel-sub-tabs">
+                <button class="excel-sub-tab active" data-sheet="clicks">🖱️ Single-Click Logs (<span id="cnt-tab-clicks">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="timeline">⏱️ Master Event Timeline (<span id="cnt-tab-timeline">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="telemetry">📡 IoT Telemetry &amp; GPS (<span id="cnt-tab-telemetry">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="batches">📦 Batches Master (<span id="cnt-tab-batches">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="custody">🚚 Custody Chain (<span id="cnt-tab-custody">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="dbt">🌾 DBT Disbursements (<span id="cnt-tab-dbt">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="reverse">⚠️ Reverse Flow Recalls (<span id="cnt-tab-reverse">0</span>)</button>
+                <button class="excel-sub-tab" data-sheet="packaging">🏷️ Packaging Hierarchy (<span id="cnt-tab-packaging">0</span>)</button>
+              </div>
+
+              <!-- Excel Table Grid Container -->
+              <div class="excel-grid-wrap" id="excel-grid-wrap">
+                <table class="excel-grid-table" id="excel-grid-table">
+                  <thead id="excel-grid-thead"></thead>
+                  <tbody id="excel-grid-tbody"></tbody>
+                </table>
+              </div>
+              <div id="excel-status-msg" style="font-size:11.5px; color:#94a3b8; font-family:var(--mono); text-align:right;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Status Footnote Bar -->
+    <div style="position:fixed; bottom:8px; right:12px; z-index:30; display:flex; align-items:center; gap:12px; font-size:11.5px; background:rgba(15,23,42,0.85); padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(10px);">
+      <a href="tel:+918005472687" style="color:#38bdf8; text-decoration:none;">📞 +91 800-KISAN-TR</a>
+      <span style="color:#64748b;">&bull;</span>
+      <a href="mailto:contact@kisantrace.org" style="color:#cbd5e1; text-decoration:none;">✉️ contact@kisantrace.org</a>
+      <span style="color:#64748b;">&bull;</span>
+      <span style="color:#94a3b8;">&copy; 2026 KisanTrace</span>
+    </div>
+
+    <!-- WebGL Fallback -->
+    <div id="err">
+      <div>
+        <h2 style="color:#ef4444; margin-bottom:8px;">3D View could not start</h2>
+        <p style="color:#94a3b8;">This browser does not support WebGL or hardware acceleration is disabled.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- SheetJS Library for Client-side Excel .xlsx Generation -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Main Application Logic -->
+  <script src="app.js"></script>
+  <!-- Fallback script link -->
+  <script src="fertilizer_app.js"></script>
+</body>
+</html>

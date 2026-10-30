@@ -1,0 +1,27 @@
+{
+  "name": "fertilizer-traceability",
+  "version": "1.0.0",
+  "description": "Interactive 3D Fertilizer Supply Chain Traceability System with Turso Cloud DB, IoT Telemetry, and DBT Subsidy Verification",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node turso_db.js --seed",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "threejs",
+    "fertilizer",
+    "traceability",
+    "blockchain",
+    "dbt-subsidy",
+    "iot-telemetry",
+    "turso",
+    "libsql"
+  ],
+  "author": "Nihalsamar",
+  "license": "MIT",
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "express": "^4.21.2"
+  }
+}
